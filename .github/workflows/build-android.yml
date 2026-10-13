@@ -36,7 +36,7 @@ jobs:
         id: findzip
         shell: bash
         run: |
-          ZIP_FILE=$(find . -type f -iname "WhatsAppReportApp2.zip" -print -quit)
+          ZIP_FILE=$(find . -type f -iname "WhatsAppReportApp2_DemonKing*.zip" -print -quit)
 
           if [ -z "$ZIP_FILE" ]; then
             echo "ERROR: WhatsAppReportApp2.zip not found."
