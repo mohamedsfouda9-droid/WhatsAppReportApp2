@@ -32,23 +32,65 @@ jobs:
         with:
           packages: "platforms;android-35 build-tools;35.0.0"
 
-      - name: Check ZIP exists
-        run: test -f WhatsAppReportApp2.zip
+      - name: Find project ZIP
+        id: findzip
+        shell: bash
+        run: |
+          ZIP_FILE=$(find . -type f -iname "WhatsAppReportApp2.zip" -print -quit)
+
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ERROR: WhatsAppReportApp2.zip not found."
+            echo "Files in repository:"
+            find . -maxdepth 5 -type f
+            exit 1
+          fi
+
+          echo "Found ZIP: $ZIP_FILE"
+          echo "zip_file=$ZIP_FILE" >> "$GITHUB_OUTPUT"
 
       - name: Extract project ZIP
         run: |
-          mkdir extracted
-          unzip -q WhatsAppReportApp2.zip -d extracted
-          test -f extracted/WhatsAppReportApp2/settings.gradle
-          test -f extracted/WhatsAppReportApp2/app/build.gradle
+          mkdir -p extracted
+          unzip -q "${{ steps.findzip.outputs.zip_file }}" -d extracted
+
+          echo "Extracted files:"
+          find extracted -maxdepth 5 -type f
+
+      - name: Locate Android project
+        id: project
+        shell: bash
+        run: |
+          SETTINGS=$(find extracted -type f -name settings.gradle -print -quit)
+
+          if [ -z "$SETTINGS" ]; then
+            SETTINGS=$(find extracted -type f -name settings.gradle.kts -print -quit)
+          fi
+
+          if [ -z "$SETTINGS" ]; then
+            echo "ERROR: Android project settings file not found."
+            exit 1
+          fi
+
+          PROJECT_DIR=$(dirname "$SETTINGS")
+
+          if [ ! -f "$PROJECT_DIR/app/build.gradle" ] && \
+             [ ! -f "$PROJECT_DIR/app/build.gradle.kts" ]; then
+            echo "ERROR: app/build.gradle was not found."
+            exit 1
+          fi
+
+          echo "Project directory: $PROJECT_DIR"
+          echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
 
       - name: Build debug APK
-        working-directory: extracted/WhatsAppReportApp2
-        run: gradle --no-daemon assembleDebug
+        run: |
+          gradle --no-daemon \
+            -p "${{ steps.project.outputs.project_dir }}" \
+            assembleDebug
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: WhatsAppReportApp2-debug-apk
-          path: extracted/WhatsAppReportApp2/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ steps.project.outputs.project_dir }}/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
