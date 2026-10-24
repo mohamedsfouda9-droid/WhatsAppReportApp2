@@ -20,7 +20,7 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Extract ZIP and Organize Source Files
+    - name: Extract and Structure Project
       run: |
         mkdir -p extracted_project/app/src/main/java/com/example/whatsappreportapp2
         mkdir -p extracted_project/app/src/main/res
@@ -28,17 +28,18 @@ jobs:
         ZIP_FILE=$(find . -maxdepth 2 -name "*.zip" | head -n 1)
         if [ -n "$ZIP_FILE" ]; then
           echo "Extracting contents from $ZIP_FILE..."
-          # فك الملفات في مجلد مؤقت أولاً لنقلها وترتيبها بشكل صحيح
           mkdir -p temp_extracted
           unzip -o "$ZIP_FILE" -d temp_extracted/
           
-          # نقل أي ملفات كود برمجية إلى مسار الباكدج الصحيح تلقائياً
+          # البحث النسبي ونقل ملفات الكود أينما كانت
           find temp_extracted -name "*.kt" -exec cp {} extracted_project/app/src/main/java/com/example/whatsappreportapp2/ \; || true
           find temp_extracted -name "*.java" -exec cp {} extracted_project/app/src/main/java/com/example/whatsappreportapp2/ \; || true
           
-          # نقل مجلدات الـ res لو كانت موجودة
+          # دمج الموارد إن وجدت
           if [ -d "temp_extracted/res" ]; then
             cp -r temp_extracted/res/* extracted_project/app/src/main/res/ || true
+          elif [ -d "temp_extracted/app/src/main/res" ]; then
+            cp -r temp_extracted/app/src/main/res/* extracted_project/app/src/main/res/ || true
           fi
         fi
 
