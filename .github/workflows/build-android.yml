@@ -33,7 +33,7 @@ jobs:
 
         cd extracted_project
         
-        # إنشاء ملفات الإعدادات والجريدل الأساسية لضمان البناء
+        # إنشاء ملفات الإعدادات والجريدل الأساسية
         echo 'rootProject.name = "WhatsAppReportApp2"' > settings.gradle
         echo "include ':app'" >> settings.gradle
 
@@ -44,8 +44,8 @@ jobs:
                 mavenCentral()
             }
             dependencies {
-                classpath "com.android.tools.build:gradle:8.1.0"
-                classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
+                classpath "com.android.tools.build:gradle:8.1.1"
+                classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20"
             }
         }
         allprojects {
@@ -113,7 +113,8 @@ jobs:
     - name: Build Debug APK
       run: |
         cd extracted_project
-        gradle wrapper
+        # توليد إصدار جريدل متوافق ومستقرار تماماً (إصدار 8.0)
+        gradle wrapper --gradle-version 8.0
         chmod +x gradlew
         ./gradlew assembleDebug
 
