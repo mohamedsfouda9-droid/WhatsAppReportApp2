@@ -35,29 +35,26 @@ jobs:
 
         cd extracted_project
         
-        cat << 'EOF' > settings.gradle
-        pluginManagement {
+        echo 'rootProject.name = "WhatsAppReportApp2"' > settings.gradle
+        echo "include ':app'" >> settings.gradle
+
+        cat << 'EOF' > build.gradle
+        buildscript {
             repositories {
                 google()
                 mavenCentral()
                 gradlePluginPortal()
             }
+            dependencies {
+                classpath "com.android.tools.build:gradle:7.4.2"
+                classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
+            }
         }
-        dependencyResolutionManagement {
-            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+        allprojects {
             repositories {
                 google()
                 mavenCentral()
             }
-        }
-        rootProject.name = "WhatsAppReportApp2"
-        include ':app'
-        EOF
-
-        cat << 'EOF' > build.gradle
-        plugins {
-            id 'com.android.application' version '8.1.1' apply false
-            id 'org.jetbrains.kotlin.android' version '1.8.20' apply false
         }
         EOF
 
@@ -68,11 +65,11 @@ jobs:
         }
         android {
             namespace 'com.example.whatsappreportapp2'
-            compileSdk 34
+            compileSdk 33
             defaultConfig {
                 applicationId "com.example.whatsappreportapp2"
                 minSdk 24
-                targetSdk 34
+                targetSdk 33
                 versionCode 1
                 versionName "1.0"
             }
@@ -85,7 +82,7 @@ jobs:
             }
         }
         dependencies {
-            implementation 'androidx.core:core-ktx:1.12.0'
+            implementation 'androidx.core:core-ktx:1.9.0'
             implementation 'androidx.appcompat:appcompat:1.6.1'
             implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
         }
@@ -112,16 +109,14 @@ jobs:
         </manifest>
         EOF
 
-    - name: Build Debug APK with Gradle 8.1.1
+    - name: Build Debug APK with Gradle 7.5
       run: |
         cd extracted_project
-        # تنزيل وتثبيت Gradle 8.1.1 يدوياً لضمان عدم استخدام إصدار النظام الافتراضي المعارض
-        wget https://services.gradle.org/distributions/gradle-8.1.1-bin.zip
-        unzip -q gradle-8.1.1-bin.zip
-        export PATH=$PWD/gradle-8.1.1/bin:$PATH
+        wget https://services.gradle.org/distributions/gradle-7.5-bin.zip
+        unzip -q gradle-7.5-bin.zip
+        export PATH=$PWD/gradle-7.5/bin:$PATH
         
-        gradle --version
-        gradle wrapper --gradle-version 8.1.1
+        gradle wrapper --gradle-version 7.5
         chmod +x gradlew
         ./gradlew assembleDebug
 
