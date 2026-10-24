@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: set up JDK 17
-      uses: actions/setup-java@v3
+      uses: setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '17'
@@ -33,20 +33,30 @@ jobs:
 
         cd extracted_project
         
-        # إنشاء ملفات الإعدادات والجريدل الأساسية بطريقة حديثة متوافقة تماماً
-        echo 'rootProject.name = "WhatsAppReportApp2"' > settings.gradle
-        echo "include ':app'" >> settings.gradle
+        # تعريف مستودعات البلجنات والإعدادات الأساسية بشكل صحيح
+        cat << 'EOF' > settings.gradle
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
+        }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        rootProject.name = "WhatsAppReportApp2"
+        include ':app'
+        EOF
 
         cat << 'EOF' > build.gradle
         plugins {
             id 'com.android.application' version '8.1.1' apply false
             id 'org.jetbrains.kotlin.android' version '1.8.20' apply false
-        }
-        allprojects {
-            repositories {
-                google()
-                mavenCentral()
-            }
         }
         EOF
 
