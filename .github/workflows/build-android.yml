@@ -23,12 +23,14 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./WhatsAppReportApp2/gradlew
+
     - name: Build Debug APK
-      working-directory: ./WhatsAppReportApp2   # <--- ضع هنا اسم المجلد الموجود فيه ملفات المشروع الرئيسية (الذي يحتوي على settings.gradle)
-      run: ./gradlew assembleDebug
+      run: ./WhatsAppReportApp2/gradlew assembleDebug
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
         name: app-debug-apk
-        path: WhatsAppReportApp2/app/build/outputs/apk/debug/app-debug.apk   # <--- تحديث مسار الناتج أيضاً ليطابق المجلد
+        path: WhatsAppReportApp2/app/build/outputs/apk/debug/app-debug.apk
