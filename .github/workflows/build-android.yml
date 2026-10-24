@@ -112,10 +112,15 @@ jobs:
         </manifest>
         EOF
 
-    - name: Build Debug APK
+    - name: Build Debug APK with Gradle 8.1.1
       run: |
         cd extracted_project
-        # توليد ملفات الـ Wrapper وتثبيت أداة الـ gradlew قبل البناء
+        # تنزيل وتثبيت Gradle 8.1.1 يدوياً لضمان عدم استخدام إصدار النظام الافتراضي المعارض
+        wget https://services.gradle.org/distributions/gradle-8.1.1-bin.zip
+        unzip -q gradle-8.1.1-bin.zip
+        export PATH=$PWD/gradle-8.1.1/bin:$PATH
+        
+        gradle --version
         gradle wrapper --gradle-version 8.1.1
         chmod +x gradlew
         ./gradlew assembleDebug
