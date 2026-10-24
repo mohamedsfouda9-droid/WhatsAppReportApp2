@@ -23,25 +23,40 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
-    - name: Unzip project file
+    - name: Unzip and locate project
       run: |
-        echo "=== Listing files in root ==="
+        echo "=== Listing root files ==="
         ls -la
         
-        # البحث عن أي ملف ضغط في المستودع وفكه تلقائياً
-        ZIP_FILE=$(find . -name "*.zip" | head -n 1)
+        # إنشاء مجلد وفك أول ملف ZIP يلاقيه
+        mkdir -p extracted_project
+        ZIP_FILE=$(find . -maxdepth 2 -name "*.zip" | head -n 1)
+        
         if [ -n "$ZIP_FILE" ]; then
-          echo "Found ZIP file: $ZIP_FILE, extracting..."
+          echo "Extracting $ZIP_FILE..."
           unzip -o "$ZIP_FILE" -d extracted_project
         else
-          echo "Error: No ZIP file found in repository!"
+          echo "Error: No ZIP file found!"
           exit 1
         fi
+        
+        echo "=== Extracted Contents ==="
+        ls -la extracted_project
 
     - name: Build Debug APK
       run: |
-        # الانتقال للمجلد المستخرج وبناء المشروع
-        cd extracted_project/WhatsAppReportApp2   # (أو المجلد الناتج من فك الضغط)
+        # البحث أوتوماتيكياً عن المجلد الذي يحتوي على settings.gradle والدخول إليه
+        PROJECT_PATH=$(find extracted_project -name "settings.gradle" -exec dirname {} \; | head -n 1)
+        
+        if [ -z "$PROJECT_PATH" ]; then
+          echo "Error: settings.gradle not found in extracted files!"
+          exit 1
+        fi
+        
+        echo "Found project at: $PROJECT_PATH"
+        cd "$PROJECT_PATH"
+        
+        # توليد الـ Wrapper وبناء التطبيق
         gradle wrapper
         chmod +x gradlew
         ./gradlew assembleDebug
