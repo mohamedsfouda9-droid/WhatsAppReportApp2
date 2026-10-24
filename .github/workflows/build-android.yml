@@ -31,11 +31,9 @@ jobs:
           mkdir -p temp_extracted
           unzip -o "$ZIP_FILE" -d temp_extracted/
           
-          # البحث النسبي ونقل ملفات الكود أينما كانت
           find temp_extracted -name "*.kt" -exec cp {} extracted_project/app/src/main/java/com/example/whatsappreportapp2/ \; || true
           find temp_extracted -name "*.java" -exec cp {} extracted_project/app/src/main/java/com/example/whatsappreportapp2/ \; || true
           
-          # دمج الموارد إن وجدت
           if [ -d "temp_extracted/res" ]; then
             cp -r temp_extracted/res/* extracted_project/app/src/main/res/ || true
           elif [ -d "temp_extracted/app/src/main/res" ]; then
@@ -127,6 +125,7 @@ jobs:
         
         gradle wrapper --gradle-version 7.5
         chmod +x gradlew
+        # استخدام assembleDebug مباشرة بدون طباعة معلومات زايدة توقف البيلد
         ./gradlew assembleDebug
 
     - name: Upload APK artifact
