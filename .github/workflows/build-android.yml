@@ -1,4 +1,4 @@
-name: Android CI
+name: Android CI from ZIP
 
 on:
   push:
@@ -23,14 +23,25 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
-    - name: Locate project directory and build
+    - name: Unzip project file
       run: |
-        # البحث عن مكان ملف settings.gradle تلقائياً في المستودع والدخول إليه
-        PROJECT_DIR=$(find . -name "settings.gradle" -maxdepth 3 -exec dirname {} \;)
-        echo "Found project directory at: $PROJECT_DIR"
-        cd "$PROJECT_DIR"
+        echo "=== Listing files in root ==="
+        ls -la
         
-        # توليد الWrapper وبناء الـ APK من نفس المجلد الصحيح
+        # البحث عن أي ملف ضغط في المستودع وفكه تلقائياً
+        ZIP_FILE=$(find . -name "*.zip" | head -n 1)
+        if [ -n "$ZIP_FILE" ]; then
+          echo "Found ZIP file: $ZIP_FILE, extracting..."
+          unzip -o "$ZIP_FILE" -d extracted_project
+        else
+          echo "Error: No ZIP file found in repository!"
+          exit 1
+        fi
+
+    - name: Build Debug APK
+      run: |
+        # الانتقال للمجلد المستخرج وبناء المشروع
+        cd extracted_project/WhatsAppReportApp2   # (أو المجلد الناتج من فك الضغط)
         gradle wrapper
         chmod +x gradlew
         ./gradlew assembleDebug
