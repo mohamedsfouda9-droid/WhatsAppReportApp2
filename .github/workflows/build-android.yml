@@ -20,9 +20,6 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-
     - name: Extract ZIP and Setup Project Structure
       run: |
         mkdir -p extracted_project
@@ -110,14 +107,18 @@ jobs:
         </manifest>
         EOF
 
-    - name: Build Debug APK
+    - name: Build Debug APK with Gradle 7.5
       run: |
         cd extracted_project
-        # توليد الملفات وتثبيت الإلزام بإصدار 7.5 بشكل قاطع
-        gradle wrapper --gradle-version 7.5 --distribution-type bin
-        ./gradlew --version
+        # تحميل وتثبيت Gradle 7.5 يدوياً وبشكل كامل لضمان توافق الإصدار
+        wget https://services.gradle.org/distributions/gradle-7.5-bin.zip
+        unzip -q gradle-7.5-bin.zip
+        export PATH=$PWD/gradle-7.5/bin:$PATH
+        
+        gradle --version
+        gradle wrapper --gradle-version 7.5
         chmod +x gradlew
-        ./gradlew assembleDebug --stacktrace
+        ./gradlew assembleDebug
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
