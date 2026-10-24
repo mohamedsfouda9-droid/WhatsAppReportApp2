@@ -33,7 +33,6 @@ jobs:
 
         cd extracted_project
         
-        # إعدادات المشروع والجرديل التلقائية المستقرة
         echo 'rootProject.name = "WhatsAppReportApp2"' > settings.gradle
         echo "include ':app'" >> settings.gradle
 
@@ -114,9 +113,11 @@ jobs:
     - name: Build Debug APK
       run: |
         cd extracted_project
-        gradle wrapper --gradle-version 7.5
+        # توليد الملفات وتثبيت الإلزام بإصدار 7.5 بشكل قاطع
+        gradle wrapper --gradle-version 7.5 --distribution-type bin
+        ./gradlew --version
         chmod +x gradlew
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --stacktrace
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
