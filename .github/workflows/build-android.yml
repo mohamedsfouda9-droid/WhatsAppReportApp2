@@ -115,8 +115,10 @@ jobs:
     - name: Build Debug APK
       run: |
         cd extracted_project
-        chmod +x gradlew || true
-        ./gradlew assembleDebug --warning-mode all
+        # توليد ملفات الـ Wrapper وتثبيت أداة الـ gradlew قبل البناء
+        gradle wrapper --gradle-version 8.1.1
+        chmod +x gradlew
+        ./gradlew assembleDebug
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
