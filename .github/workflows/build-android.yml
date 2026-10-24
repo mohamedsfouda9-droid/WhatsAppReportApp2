@@ -23,17 +23,20 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
-    - name: Generate Gradle Wrapper
-      run: gradle wrapper
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
+    - name: Locate project directory and build
+      run: |
+        # البحث عن مكان ملف settings.gradle تلقائياً في المستودع والدخول إليه
+        PROJECT_DIR=$(find . -name "settings.gradle" -maxdepth 3 -exec dirname {} \;)
+        echo "Found project directory at: $PROJECT_DIR"
+        cd "$PROJECT_DIR"
+        
+        # توليد الWrapper وبناء الـ APK من نفس المجلد الصحيح
+        gradle wrapper
+        chmod +x gradlew
+        ./gradlew assembleDebug
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
         name: app-debug-apk
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: '**/app/build/outputs/apk/debug/app-debug.apk'
