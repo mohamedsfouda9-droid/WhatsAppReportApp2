@@ -20,40 +20,47 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Extract ZIP and Setup Project Structure
+    - name: Extract ZIP and Clean Structure
       run: |
-        mkdir -p extracted_project
+        mkdir -p extracted_project/app/src/main/java/com/example/whatsappreportapp2
+        mkdir -p extracted_project/app/src/main/res/layout
+        mkdir -p extracted_project/app/src/main/res/drawable
+        
         ZIP_FILE=$(find . -maxdepth 2 -name "*.zip" | head -n 1)
         if [ -n "$ZIP_FILE" ]; then
-          unzip -o "$ZIP_FILE" -d extracted_project/
+          echo "Extracting contents from $ZIP_FILE..."
+          unzip -o "$ZIP_FILE" -d extracted_project/app/src/main/java/com/example/whatsappreportapp2/ || true
+          unzip -o "$ZIP_FILE" -d extracted_project/app/src/main/res/ || true
         fi
 
         cd extracted_project
         
-        echo 'rootProject.name = "WhatsAppReportApp2"' > settings.gradle
-        echo "include ':app'" >> settings.gradle
-
-        cat << 'EOF' > build.gradle
-        buildscript {
+        cat << 'EOF' > settings.gradle
+        pluginManagement {
             repositories {
                 google()
                 mavenCentral()
                 gradlePluginPortal()
             }
-            dependencies {
-                classpath "com.android.tools.build:gradle:7.4.2"
-                classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
-            }
         }
-        allprojects {
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
             repositories {
                 google()
                 mavenCentral()
             }
         }
+        rootProject.name = "WhatsAppReportApp2"
+        include ':app'
         EOF
 
-        mkdir -p app
+        cat << 'EOF' > build.gradle
+        plugins {
+            id 'com.android.application' version '8.1.1' apply false
+            id 'org.jetbrains.kotlin.android' version '1.8.20' apply false
+        }
+        EOF
+
         cat << 'EOF' > app/build.gradle
         plugins {
             id 'com.android.application'
@@ -84,7 +91,6 @@ jobs:
         }
         EOF
 
-        mkdir -p app/src/main
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <application
@@ -106,16 +112,11 @@ jobs:
         </manifest>
         EOF
 
-    - name: Build Debug APK with Gradle 7.5
+    - name: Build Debug APK
       run: |
         cd extracted_project
-        wget https://services.gradle.org/distributions/gradle-7.5-bin.zip
-        unzip -q gradle-7.5-bin.zip
-        export PATH=$PWD/gradle-7.5/bin:$PATH
-        
-        gradle wrapper --gradle-version 7.5
-        chmod +x gradlew
-        ./gradlew assembleDebug
+        chmod +x gradlew || true
+        ./gradlew assembleDebug --warning-mode all
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
