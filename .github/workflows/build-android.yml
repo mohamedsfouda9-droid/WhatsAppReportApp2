@@ -23,11 +23,18 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
+    - name: Generate Gradle Wrapper inside project
+      run: |
+        cd WhatsAppReportApp2
+        gradle wrapper
+
     - name: Grant execute permission for gradlew
       run: chmod +x ./WhatsAppReportApp2/gradlew
 
     - name: Build Debug APK
-      run: ./WhatsAppReportApp2/gradlew assembleDebug
+      run: |
+        cd WhatsAppReportApp2
+        ./gradlew assembleDebug
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
