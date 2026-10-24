@@ -80,7 +80,6 @@ jobs:
         dependencies {
             implementation 'androidx.core:core-ktx:1.12.0'
             implementation 'androidx.appcompat:appcompat:1.6.1'
-            implementation 'com.google.android.material:material:1.11.0'
             implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
         }
         EOF
@@ -110,12 +109,10 @@ jobs:
     - name: Build Debug APK with Gradle 7.5
       run: |
         cd extracted_project
-        # تحميل وتثبيت Gradle 7.5 يدوياً وبشكل كامل لضمان توافق الإصدار
         wget https://services.gradle.org/distributions/gradle-7.5-bin.zip
         unzip -q gradle-7.5-bin.zip
         export PATH=$PWD/gradle-7.5/bin:$PATH
         
-        gradle --version
         gradle wrapper --gradle-version 7.5
         chmod +x gradlew
         ./gradlew assembleDebug
