@@ -25,108 +25,90 @@ jobs:
 
     - name: Extract ZIP and Setup Project Structure
       run: |
-        echo "=== Listing repository files ==="
-        ls -la
-        
-        # إنشاء مجلد العمل وفك ضغط الـ ZIP
-        mkdir -p extracted_project/app/src/main/java/com/example/whatsappreportapp2
-        mkdir -p extracted_project/app/src/main/res/layout
-        mkdir -p extracted_project/app/src/main/res/drawable
-        
+        mkdir -p extracted_project
         ZIP_FILE=$(find . -maxdepth 2 -name "*.zip" | head -n 1)
         if [ -n "$ZIP_FILE" ]; then
-          echo "Extracting $ZIP_FILE..."
-          unzip -o "$ZIP_FILE" -d extracted_project/app/src/main/java/com/example/whatsappreportapp2/ || true
-          # في حال الملفات فكت في الجذر المباشر
-          unzip -o "$ZIP_FILE" -d extracted_project/ || true
+          unzip -o "$ZIP_FILE" -d extracted_project/
         fi
 
-        # إنشاء ملفات إعدادات الجريدل الجذرية تلقائياً لضمان نجاح البيلد
         cd extracted_project
         
-        if [ ! -f "settings.gradle" ]; then
-          echo 'rootProject.name = "WhatsAppReportApp2"' > settings.gradle
-          echo "include ':app'" >> settings.gradle
-        fi
+        # إنشاء ملفات الإعدادات والجريدل الأساسية لضمان البناء
+        echo 'rootProject.name = "WhatsAppReportApp2"' > settings.gradle
+        echo "include ':app'" >> settings.gradle
 
-        if [ ! -f "build.gradle" ]; then
-          cat << 'EOF' > build.gradle
-          buildscript {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-              dependencies {
-                  classpath "com.android.tools.build:gradle:8.1.0"
-                  classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
-              }
-          }
-          allprojects {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          EOF
-        fi
+        cat << 'EOF' > build.gradle
+        buildscript {
+            repositories {
+                google()
+                mavenCentral()
+            }
+            dependencies {
+                classpath "com.android.tools.build:gradle:8.1.0"
+                classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
+            }
+        }
+        allprojects {
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        EOF
 
-        if [ ! -f "app/build.gradle" ]; then
-          mkdir -p app
-          cat << 'EOF' > app/build.gradle
-          plugins {
-              id 'com.android.application'
-              id 'org.jetbrains.kotlin.android'
-          }
-          android {
-              namespace 'com.example.whatsappreportapp2'
-              compileSdk 34
-              defaultConfig {
-                  applicationId "com.example.whatsappreportapp2"
-                  minSdk 24
-                  targetSdk 34
-                  versionCode 1
-                  versionName "1.0"
-              }
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
-              kotlinOptions {
-                  jvmTarget = '17'
-              }
-          }
-          dependencies {
-              implementation 'androidx.core:core-ktx:1.12.0'
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'com.google.android.material:material:1.11.0'
-              implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-          }
-          EOF
-        fi
+        mkdir -p app
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application'
+            id 'org.jetbrains.kotlin.android'
+        }
+        android {
+            namespace 'com.example.whatsappreportapp2'
+            compileSdk 34
+            defaultConfig {
+                applicationId "com.example.whatsappreportapp2"
+                minSdk 24
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+            kotlinOptions {
+                jvmTarget = '17'
+            }
+        }
+        dependencies {
+            implementation 'androidx.core:core-ktx:1.12.0'
+            implementation 'androidx.appcompat:appcompat:1.6.1'
+            implementation 'com.google.android.material:material:1.11.0'
+            implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+        }
+        EOF
 
-        if [ ! -f "app/src/main/AndroidManifest.xml" ]; then
-          mkdir -p app/src/main
-          cat << 'EOF' > app/src/main/AndroidManifest.xml
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <application
-                  android:allowBackup="true"
-                  android:icon="@mipmap/ic_launcher"
-                  android:label="WhatsAppReport"
-                  android:roundIcon="@mipmap/ic_launcher_round"
-                  android:supportsRtl="true"
-                  android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-                  <activity
-                      android:name=".BanTermsActivity"
-                      android:exported="true">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>
-          EOF
-        fi
+        mkdir -p app/src/main
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <application
+                android:allowBackup="true"
+                android:icon="@mipmap/ic_launcher"
+                android:label="WhatsAppReport"
+                android:roundIcon="@mipmap/ic_launcher_round"
+                android:supportsRtl="true"
+                android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+                <activity
+                    android:name=".BanTermsActivity"
+                    android:exported="true">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+            </application>
+        </manifest>
+        EOF
 
     - name: Build Debug APK
       run: |
