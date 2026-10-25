@@ -5,7 +5,7 @@
         android:label="WhatsAppReport"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        android:theme="@android:style/Theme.NoTitleBar">
         <activity
             android:name=".BanTermsActivity"
             android:exported="true">
