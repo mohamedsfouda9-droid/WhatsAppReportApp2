@@ -43,14 +43,14 @@ jobs:
 
         cd extracted_project
         
-        # 1. إنشاء ملف gradle.properties بشكل منفصل تماماً
+        # 1. ملف gradle.properties المنفصل
         cat << 'EOF' > gradle.properties
         org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
         android.useAndroidX=true
         android.enableJetifier=true
         EOF
 
-        # 2. إنشاء ملف settings.gradle بشكل منفصل
+        # 2. ملف settings.gradle (مركز إدارة المستودعات الوحيد)
         cat << 'EOF' > settings.gradle
         pluginManagement {
             repositories {
@@ -60,7 +60,7 @@ jobs:
             }
         }
         dependencyResolutionManagement {
-            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
             repositories {
                 google()
                 mavenCentral()
@@ -70,28 +70,17 @@ jobs:
         include ':app'
         EOF
 
-        # 3. إنشاء ملف build.gradle الرئيسي بشكل منفصل
+        # 3. ملف build.gradle الرئيسي (بدون مستودعات متضاربة)
         cat << 'EOF' > build.gradle
         buildscript {
-            repositories {
-                google()
-                mavenCentral()
-                gradlePluginPortal()
-            }
             dependencies {
                 classpath "com.android.tools.build:gradle:7.4.2"
                 classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
             }
         }
-        allprojects {
-            repositories {
-                google()
-                mavenCentral()
-            }
-        }
         EOF
 
-        # 4. إنشاء ملف app/build.gradle بشكل منفصل
+        # 4. ملف app/build.gradle
         cat << 'EOF' > app/build.gradle
         plugins {
             id 'com.android.application'
@@ -123,7 +112,7 @@ jobs:
         }
         EOF
 
-        # 5. إنشاء ملف AndroidManifest.xml بشكل منفصل
+        # 5. ملف AndroidManifest.xml
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <application
