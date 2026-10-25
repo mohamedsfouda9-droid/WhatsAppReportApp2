@@ -22,18 +22,42 @@ jobs:
 
     - name: Assemble Project from Separate Files and ZIP
       run: |
-        # 1. إنشاء الهيكلة الأساسية للمشروع
+        # 1. إنشاء الهيكلة الأساسية للمشروع ومجلدات الأيقونات الافتراضية لمنع أي خطأ
         mkdir -p extracted_project/app/src/main/java/com/example/whatsappreportapp2
-        mkdir -p extracted_project/app/src/main/res
-        
-        # 2. نقل وتركيب ملفات الإعدادات المنفصلة
+        mkdir -p extracted_project/app/src/main/res/mipmap-mdpi
+        mkdir -p extracted_project/app/src/main/res/mipmap-hdpi
+        mkdir -p extracted_project/app/src/main/res/mipmap-xhdpi
+        mkdir -p extracted_project/app/src/main/res/mipmap-xxhdpi
+        mkdir -p extracted_project/app/src/main/res/mipmap-xxxhdpi
+
+        # 2. إنشاء أيقونات XML افتراضية آمنة في حال عدم توفرها في الـ ZIP
+        cat << 'EOF' > extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher.xml
+        <vector xmlns:android="http://schemas.android.com/apk/res/android"
+            android:width="48dp"
+            android:height="48dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+            <path android:fillColor="#FF000000" android:pathData="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2Z"/>
+        </vector>
+        EOF
+        cp extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher.xml extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher_round.xml
+        cp extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher.xml extracted_project/app/src/main/res/mipmap-mdpi/ic_launcher.xml
+        cp extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher.xml extracted_project/app/src/main/res/mipmap-mdpi/ic_launcher_round.xml
+        cp extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher.xml extracted_project/app/src/main/res/mipmap-xhdpi/ic_launcher.xml
+        cp extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher.xml extracted_project/app/src/main/res/mipmap-xhdpi/ic_launcher_round.xml
+        cp extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher.xml extracted_project/app/src/main/res/mipmap-xxhdpi/ic_launcher.xml
+        cp extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher.xml extracted_project/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.xml
+        cp extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher.xml extracted_project/app/src/main/res/mipmap-xxxhdpi/ic_launcher.xml
+        cp extracted_project/app/src/main/res/mipmap-hdpi/ic_launcher.xml extracted_project/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.xml
+
+        # 3. نقل وتركيب ملفات الإعدادات المنفصلة
         if [ -f "prop.txt" ]; then cp prop.txt extracted_project/gradle.properties; fi
         if [ -f "settings.txt" ]; then cp settings.txt extracted_project/settings.gradle; fi
         if [ -f "build-root.txt" ]; then cp build-root.txt extracted_project/build.gradle; fi
         if [ -f "build-app.txt" ]; then cp build-app.txt extracted_project/app/build.gradle; fi
         if [ -f "manifest.txt" ]; then cp manifest.txt extracted_project/app/src/main/AndroidManifest.xml; fi
 
-        # 3. فك ملف الـ ZIP ودمج الكود والموارد الأصلية إن وجدت
+        # 4. فك ملف الـ ZIP ودمج الكود والموارد الأصلية (لو وُجدت ستتخطى الافتراضية)
         ZIP_FILE=$(find . -maxdepth 2 -name "*.zip" | head -n 1)
         if [ -n "$ZIP_FILE" ]; then
           echo "Extracting contents from $ZIP_FILE..."
@@ -44,7 +68,7 @@ jobs:
           find temp_extracted -name "*.kt" -exec cp {} extracted_project/app/src/main/java/com/example/whatsappreportapp2/ \; || true
           find temp_extracted -name "*.java" -exec cp {} extracted_project/app/src/main/java/com/example/whatsappreportapp2/ \; || true
           
-          # دمج الموارد الأصلية لو وجدت (الأيقونات وغيرها)
+          # دمج الموارد الأصلية لو وجدت
           RES_DIR=$(find temp_extracted -type d -name "res" | head -n 1)
           if [ -n "$RES_DIR" ]; then
             echo "Found res directory, copying contents..."
