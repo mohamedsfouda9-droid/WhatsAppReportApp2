@@ -24,7 +24,7 @@ jobs:
       run: |
         # 1. إنشاء الهيكلة الأساسية للمشروع
         mkdir -p extracted_project/app/src/main/java/com/example/whatsappreportapp2
-        mkdir -p extracted_project/app/src/main/res/values
+        mkdir -p extracted_project/app/src/main/res
         
         # 2. نقل وتركيب ملفات الإعدادات المنفصلة
         if [ -f "prop.txt" ]; then cp prop.txt extracted_project/gradle.properties; fi
@@ -33,28 +33,18 @@ jobs:
         if [ -f "build-app.txt" ]; then cp build-app.txt extracted_project/app/build.gradle; fi
         if [ -f "manifest.txt" ]; then cp manifest.txt extracted_project/app/src/main/AndroidManifest.xml; fi
 
-        # 3. إنشاء ملف الثيم بالخصائص الصحيحة والمطابقة لـ Android Namespace
-        cat << 'EOF' > extracted_project/app/src/main/res/values/styles.xml
-        <resources>
-            <style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light">
-                <item name="android:windowNoTitle">true</item>
-                <item name="android:windowActionBar">false</item>
-            </style>
-        </resources>
-        EOF
-
-        # 4. فك ملف الـ ZIP ودمج الكود والموارد إن وجدت
+        # 3. فك ملف الـ ZIP ودمج الكود والموارد الأصلية إن وجدت
         ZIP_FILE=$(find . -maxdepth 2 -name "*.zip" | head -n 1)
         if [ -n "$ZIP_FILE" ]; then
           echo "Extracting contents from $ZIP_FILE..."
           mkdir -p temp_extracted
           unzip -o "$ZIP_FILE" -d temp_extracted/
           
-          # نسخ الكود
+          # نسخ الكود البرمجي
           find temp_extracted -name "*.kt" -exec cp {} extracted_project/app/src/main/java/com/example/whatsappreportapp2/ \; || true
           find temp_extracted -name "*.java" -exec cp {} extracted_project/app/src/main/java/com/example/whatsappreportapp2/ \; || true
           
-          # دمج الموارد الأصلية لو وجدت
+          # دمج الموارد الأصلية لو وجدت (الأيقونات وغيرها)
           RES_DIR=$(find temp_extracted -type d -name "res" | head -n 1)
           if [ -n "$RES_DIR" ]; then
             echo "Found res directory, copying contents..."
