@@ -20,11 +20,20 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Extract and Structure Project
+    - name: Assemble Project from Separate Files and ZIP
       run: |
+        # 1. إنشاء الهيكلة الأساسية للمشروع
         mkdir -p extracted_project/app/src/main/java/com/example/whatsappreportapp2
         mkdir -p extracted_project/app/src/main/res
         
+        # 2. نقل وتركيب كل ملف في مكانه الصحيح بالأسماء السليمة
+        if [ -f "prop.txt" ]; then cp prop.txt extracted_project/gradle.properties; fi
+        if [ -f "settings.txt" ]; then cp settings.txt extracted_project/settings.gradle; fi
+        if [ -f "build-root.txt" ]; then cp build-root.txt extracted_project/build.gradle; fi
+        if [ -f "build-app.txt" ]; then cp build-app.txt extracted_project/app/build.gradle; fi
+        if [ -f "manifest.txt" ]; then cp manifest.txt extracted_project/app/src/main/AndroidManifest.xml; fi
+
+        # 3. فك ملف الـ ZIP ودمج الكود البرمجي (.kt / .java)
         ZIP_FILE=$(find . -maxdepth 2 -name "*.zip" | head -n 1)
         if [ -n "$ZIP_FILE" ]; then
           echo "Extracting contents from $ZIP_FILE..."
@@ -40,99 +49,6 @@ jobs:
             cp -r temp_extracted/app/src/main/res/* extracted_project/app/src/main/res/ || true
           fi
         fi
-
-        cd extracted_project
-        
-        # 1. ملف gradle.properties المنفصل
-        cat << 'EOF' > gradle.properties
-        org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-        android.useAndroidX=true
-        android.enableJetifier=true
-        EOF
-
-        # 2. ملف settings.gradle (مركز إدارة المستودعات الوحيد)
-        cat << 'EOF' > settings.gradle
-        pluginManagement {
-            repositories {
-                google()
-                mavenCentral()
-                gradlePluginPortal()
-            }
-        }
-        dependencyResolutionManagement {
-            repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-            repositories {
-                google()
-                mavenCentral()
-            }
-        }
-        rootProject.name = "WhatsAppReportApp2"
-        include ':app'
-        EOF
-
-        # 3. ملف build.gradle الرئيسي (بدون مستودعات متضاربة)
-        cat << 'EOF' > build.gradle
-        buildscript {
-            dependencies {
-                classpath "com.android.tools.build:gradle:7.4.2"
-                classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
-            }
-        }
-        EOF
-
-        # 4. ملف app/build.gradle
-        cat << 'EOF' > app/build.gradle
-        plugins {
-            id 'com.android.application'
-            id 'org.jetbrains.kotlin.android'
-        }
-        android {
-            namespace 'com.example.whatsappreportapp2'
-            compileSdk 33
-            defaultConfig {
-                applicationId "com.example.whatsappreportapp2"
-                minSdk 24
-                targetSdk 33
-                versionCode 1
-                versionName "1.0"
-            }
-            compileOptions {
-                sourceCompatibility JavaVersion.VERSION_17
-                targetCompatibility JavaVersion.VERSION_17
-            }
-            kotlinOptions {
-                jvmTarget = '17'
-            }
-        }
-        dependencies {
-            implementation 'androidx.core:core-ktx:1.9.0'
-            implementation('androidx.constraintlayout:constraintlayout:2.1.4') {
-                exclude group: 'androidx.appcompat', module: 'appcompat'
-            }
-        }
-        EOF
-
-        # 5. ملف AndroidManifest.xml
-        cat << 'EOF' > app/src/main/AndroidManifest.xml
-        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-            <application
-                android:allowBackup="true"
-                android:icon="@mipmap/ic_launcher"
-                android:label="WhatsAppReport"
-                android:roundIcon="@mipmap/ic_launcher_round"
-                android:supportsRtl="true"
-                android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-                <activity
-                    android:name=".BanTermsActivity"
-                    android:exported="true">
-                    <intent-filter>
-                        <action android:name="android.intent.action.MAIN" />
-                        <category android:name="android.intent.category.LAUNCHER" />
-                    </intent-filter>
-                </activity>
-            </application>
-        </manifest>
-        EOF
 
     - name: Build Debug APK with Gradle 7.5
       run: |
