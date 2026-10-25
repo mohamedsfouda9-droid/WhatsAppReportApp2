@@ -25,7 +25,6 @@ jobs:
         # 1. إنشاء الهيكلة الأساسية للمشروع
         mkdir -p extracted_project/app/src/main/java/com/example/whatsappreportapp2
         mkdir -p extracted_project/app/src/main/res/values
-        mkdir -p extracted_project/app/src/main/res/mipmap-hdpi
         
         # 2. نقل وتركيب ملفات الإعدادات المنفصلة
         if [ -f "prop.txt" ]; then cp prop.txt extracted_project/gradle.properties; fi
@@ -34,12 +33,12 @@ jobs:
         if [ -f "build-app.txt" ]; then cp build-app.txt extracted_project/app/build.gradle; fi
         if [ -f "manifest.txt" ]; then cp manifest.txt extracted_project/app/src/main/AndroidManifest.xml; fi
 
-        # 3. إنشاء ثيم افتراضي آمن يطابق Theme.AppCompat.Light.NoActionBar لمنع أي خطأ
+        # 3. إنشاء ملف الثيم بالخصائص الصحيحة والمطابقة لـ Android Namespace
         cat << 'EOF' > extracted_project/app/src/main/res/values/styles.xml
         <resources>
             <style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light">
-                <item name="windowNoTitle">true</item>
-                <item name="windowActionBar">false</item>
+                <item name="android:windowNoTitle">true</item>
+                <item name="android:windowActionBar">false</item>
             </style>
         </resources>
         EOF
