@@ -43,9 +43,34 @@ jobs:
 
         cd extracted_project
         
-        echo 'rootProject.name = "WhatsAppReportApp2"' > settings.gradle
-        echo "include ':app'" >> settings.gradle
+        # 1. إنشاء ملف gradle.properties بشكل منفصل تماماً
+        cat << 'EOF' > gradle.properties
+        org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+        android.useAndroidX=true
+        android.enableJetifier=true
+        EOF
 
+        # 2. إنشاء ملف settings.gradle بشكل منفصل
+        cat << 'EOF' > settings.gradle
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
+        }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        rootProject.name = "WhatsAppReportApp2"
+        include ':app'
+        EOF
+
+        # 3. إنشاء ملف build.gradle الرئيسي بشكل منفصل
         cat << 'EOF' > build.gradle
         buildscript {
             repositories {
@@ -66,7 +91,7 @@ jobs:
         }
         EOF
 
-        # حل جذر المشكلة: استبعاد أي جلب تلقائي لـ appcompat نهائياً من الـ dependencies
+        # 4. إنشاء ملف app/build.gradle بشكل منفصل
         cat << 'EOF' > app/build.gradle
         plugins {
             id 'com.android.application'
@@ -98,6 +123,7 @@ jobs:
         }
         EOF
 
+        # 5. إنشاء ملف AndroidManifest.xml بشكل منفصل
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <application
