@@ -66,6 +66,7 @@ jobs:
         }
         EOF
 
+        # حل المشكلة من جذورها: اعتماديات خفيفة ونظيفة تماماً بدون أي تعارضات
         cat << 'EOF' > app/build.gradle
         plugins {
             id 'com.android.application'
@@ -91,7 +92,7 @@ jobs:
         }
         dependencies {
             implementation 'androidx.core:core-ktx:1.9.0'
-            implementation 'androidx.appcompat:appcompat:1.6.1'
+            implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
         }
         EOF
 
@@ -125,7 +126,6 @@ jobs:
         
         gradle wrapper --gradle-version 7.5
         chmod +x gradlew
-        # تشغيل نظيف بالكامل يمنع طباعة شجرة الاعتماديات الزائدة ويضمن بناء الـ APK
         ./gradlew assembleDebug --console=plain --no-daemon
 
     - name: Upload APK artifact
