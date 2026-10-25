@@ -125,8 +125,8 @@ jobs:
         
         gradle wrapper --gradle-version 7.5
         chmod +x gradlew
-        # استخدام assembleDebug مباشرة بدون طباعة معلومات زايدة توقف البيلد
-        ./gradlew assembleDebug
+        # تشغيل البناء بمعاملات تمنع طباعة الاعتماديات الزائدة وتضمن النجاح
+        ./gradlew assembleDebug --quiet || ./gradlew assembleDebug
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
