@@ -26,27 +26,29 @@ jobs:
         mkdir -p extracted_project/app/src/main/java/com/example/whatsappreportapp2
         mkdir -p extracted_project/app/src/main/res
         
-        # 2. نقل وتركيب كل ملف في مكانه الصحيح بالأسماء السليمة
+        # 2. نقل وتركيب ملفات الإعدادات المنفصلة
         if [ -f "prop.txt" ]; then cp prop.txt extracted_project/gradle.properties; fi
         if [ -f "settings.txt" ]; then cp settings.txt extracted_project/settings.gradle; fi
         if [ -f "build-root.txt" ]; then cp build-root.txt extracted_project/build.gradle; fi
         if [ -f "build-app.txt" ]; then cp build-app.txt extracted_project/app/build.gradle; fi
         if [ -f "manifest.txt" ]; then cp manifest.txt extracted_project/app/src/main/AndroidManifest.xml; fi
 
-        # 3. فك ملف الـ ZIP ودمج الكود البرمجي (.kt / .java)
+        # 3. فك ملف الـ ZIP ودمج الكود البرمجي والموارد (الأيقونات والثيمات الأصلية) بالكامل
         ZIP_FILE=$(find . -maxdepth 2 -name "*.zip" | head -n 1)
         if [ -n "$ZIP_FILE" ]; then
           echo "Extracting contents from $ZIP_FILE..."
           mkdir -p temp_extracted
           unzip -o "$ZIP_FILE" -d temp_extracted/
           
+          # نسخ ملفات الكود
           find temp_extracted -name "*.kt" -exec cp {} extracted_project/app/src/main/java/com/example/whatsappreportapp2/ \; || true
           find temp_extracted -name "*.java" -exec cp {} extracted_project/app/src/main/java/com/example/whatsappreportapp2/ \; || true
           
-          if [ -d "temp_extracted/res" ]; then
-            cp -r temp_extracted/res/* extracted_project/app/src/main/res/ || true
-          elif [ -d "temp_extracted/app/src/main/res" ]; then
-            cp -r temp_extracted/app/src/main/res/* extracted_project/app/src/main/res/ || true
+          # البحث عن مجلد res في أي مكان داخل الـ ZIP ونسخه بالكامل لضمان جلب الأيقونات والثيمات الأصلية
+          RES_DIR=$(find temp_extracted -type d -name "res" | head -n 1)
+          if [ -n "$RES_DIR" ]; then
+            echo "Found res directory at $RES_DIR, copying contents..."
+            cp -r "$RES_DIR"/* extracted_project/app/src/main/res/ || true
           fi
         fi
 
